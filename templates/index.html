@@ -17,15 +17,16 @@
     button#start-game-btn {
       display: none;
     }
-    #game-canvas {
+    div#game-container {
       display: none;
     }
   </style>
 </head>
 <body class="bg-gray-900 flex items-center justify-center min-h-screen">
-  <div id="lobby" class="bg-gray-800 p-8 rounded-lg shadow-lg text-center text-white w-full max-w-md">
-    <h1 class="text-3xl font-bold mb-6">Multiplayer Football Game</h1>
-    <div class="space-y-4">
+  <!-- Lobby Container -->
+  <div id="lobby" class="bg-gray-800 p-4 sm:p-8 rounded-lg shadow-lg text-center text-white w-full max-w-md flex flex-col items-center">
+    <h1 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Multiplayer Football Game</h1>
+    <div class="space-y-4 w-full">
       <!-- Create Room Button -->
       <button
           id="create-game-btn"
@@ -64,10 +65,47 @@
       <!-- Status Messages -->
       <p id="status" class="mt-4 text-gray-400"></p>
       <!-- Players List -->
-      <p class="text-lg font-semibold mt-6">List of Rooms</p>
+      <p class="text-lg font-semibold mt-4 sm:mt-6">List of Rooms</p>
       <div id="room-list" class="text-gray-300"></div>
     </div>
   </div>
-  <canvas id="game-canvas" width="600" height="400"></canvas>
+  <!-- Game Container -->
+  <div id="game-container" class="bg-gray-800 p-4 sm:p-8 rounded-lg shadow-lg text-center text-white w-full max-w-md flex flex-col items-center">
+    <!-- Game Canvas -->
+    <canvas
+        id="game-canvas"
+        width="300"
+        height="600"
+        class="bg-gray-700 border-2 border-blue-500 rounded-lg w-full max-w-[300px] mx-auto"
+    ></canvas>
+    <!-- Touch Controls (Mobile Only) -->
+    <div class="block md:hidden mt-4 grid grid-cols-3 gap-2 w-48 mx-auto">
+      <div></div>
+      <button
+          id="touch-up"
+          class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-full w-12 h-12 flex items-center justify-center"
+          data-key="ArrowUp"
+      >↑</button>
+      <div></div>
+      <button
+          id="touch-left"
+          class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-full w-12 h-12 flex items-center justify-center"
+          data-key="ArrowLeft"
+      >←</button>
+      <div></div>
+      <button
+          id="touch-right"
+          class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-full w-12 h-12 flex items-center justify-center"
+          data-key="ArrowRight"
+      >→</button>
+      <div></div>
+      <button
+          id="touch-down"
+          class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-full w-12 h-12 flex items-center justify-center"
+          data-key="ArrowDown"
+      >↓</button>
+      <div></div>
+    </div>
+  </div>
 </body>
 </html>

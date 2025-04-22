@@ -5,8 +5,8 @@ const Status = {
   GAME_STARTED: 'game_started',
   GAME_ENDED: 'game_ended',
 }
-const GAME_WIDTH = 600;
-const GAME_HEIGHT = 400;
+const GAME_WIDTH = 300;
+const GAME_HEIGHT = 600;
 const PLAYER_RADIUS = 15;
 const BALL_RADIUS = 10;
 const PLAYER_SPEED = 2;
@@ -35,6 +35,7 @@ window.onload = () => {
   DOM.startGameBtn = document.getElementById('start-game-btn');
   DOM.leaveGameBtn = document.getElementById('leave-game-btn');
   DOM.gameCanvas = document.getElementById('game-canvas');
+  DOM.gameContainer = document.getElementById('game-container');
   DOM.ctx = DOM.gameCanvas.getContext('2d');
 
   // Set up event listeners
@@ -45,6 +46,29 @@ window.onload = () => {
   document.addEventListener('keydown', handleKeyDown);
   document.addEventListener('keyup', handleKeyUp);
 
+
+// Touch button handling
+  DOM.touchButtons = [
+    document.getElementById('touch-up'),
+    document.getElementById('touch-left'),
+    document.getElementById('touch-right'),
+    document.getElementById('touch-down')
+  ];
+
+  DOM.touchButtons.forEach(button => {
+    if (button) {
+      button.addEventListener('touchstart', (event) => {
+        event.preventDefault();
+        const key = button.dataset.key;
+        keysPressed[key] = true;
+      });
+      button.addEventListener('touchend', (event) => {
+        event.preventDefault();
+        const key = button.dataset.key;
+        keysPressed[key] = false;
+      });
+    }
+  });
 }
 
 
@@ -151,9 +175,9 @@ socket.on('game_started', (data) => {
   console.log('Game started:', data);
   status = Status.GAME_STARTED;
   DOM.lobby.style.display = 'none';
-  DOM.gameCanvas.style.display = 'block';
-  DOM.gameCanvas.width = GAME_WIDTH;
-  DOM.gameCanvas.height = GAME_HEIGHT;
+  DOM.gameContainer.style.display = 'block';
+  // DOM.gameCanvas.width = GAME_WIDTH;
+  // DOM.gameCanvas.height = GAME_HEIGHT;
   gameLoop();
 });
 
@@ -167,6 +191,7 @@ socket.on('game_state', (state) => {
 
 function renderGame(state) {
   const ctx = DOM.ctx;
+  console.log(ctx);
   // Clear the canvas
   ctx.fillStyle = BACKGROUND_COLOR;
   ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);

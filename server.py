@@ -1,6 +1,4 @@
-import copy
 import threading
-import time
 from random import randint
 
 import eventlet
@@ -14,6 +12,8 @@ from flask_socketio import SocketIO, join_room, leave_room, emit
 COLLISION_DISTANCE = 25
 BALL_KICK_FORCE = 0.1
 UPDATE_INTERVAL = 1 / 60
+WIDTH = 300
+HEIGHT = 600
 
 
 app = Flask(__name__)
@@ -35,11 +35,11 @@ class GameStatus:
 class GameState:
     def __init__(self):
         self.players = {}
-        self.ball = {'x': 300, 'y': 200, 'vx': 0, 'vy': 0}
+        self.ball = {'x': WIDTH / 2, 'y': HEIGHT / 2, 'vx': 0, 'vy': 0}
 
     def reset_ball(self):
-        self.ball['x'] = 300
-        self.ball['y'] = 200
+        self.ball['x'] = WIDTH / 2
+        self.ball['y'] = HEIGHT / 2
         self.ball['vx'] = 0
         self.ball['vy'] = 0
 
@@ -253,12 +253,12 @@ def game_loop(room_id):
         ball['vy'] *= 0.98
 
         # Boundary checks
-        if ball['x'] < 10 or ball['x'] > 590:
+        if ball['x'] < 10 or ball['x'] > WIDTH - 10:
             ball['vx'] *= -1
-        if ball['y'] < 10 or ball['y'] > 390:
+        if ball['y'] < 10 or ball['y'] > HEIGHT - 10:
             ball['vy'] *= -1
 
-        # Broadcast state if smth changed
+        # TODO: Broadcast state only if smth changed
         # if room['state'] != prev_state:
         # print(room['state'])
         send_game_state(room_id)
