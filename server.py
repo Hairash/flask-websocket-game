@@ -1,4 +1,6 @@
+import os
 import threading
+import time
 from random import randint
 
 import eventlet
@@ -11,14 +13,14 @@ from flask_socketio import SocketIO, join_room, leave_room, emit
 
 COLLISION_DISTANCE = 25
 BALL_KICK_FORCE = 0.1
-UPDATE_INTERVAL = 1 / 60
+UPDATE_INTERVAL = float(os.getenv('UPDATE_INTERVAL', 1 / 60))  # seconds
 WIDTH = 300
-HEIGHT = 600
+HEIGHT = 450
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'
-socketio = SocketIO(app)
+socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*", message_compression=True)
 
 players = []  # List of players
 # Store game rooms (e.g., in-memory dictionary for simplicity)
@@ -51,6 +53,7 @@ class GameState:
         self.players[player_id] = {
             'x': 100,
             'y': 100,
+            'last_update': time.time(),
         }
 
     def update_player(self, player_id, x, y):
@@ -116,6 +119,7 @@ def handle_create_game():
         'status': GameStatus.WAITING,
         'state': GameState(),
         'thread': None,
+        'last_update': time.time(),
     }
     players_rooms[request.sid] = room_id
     send_room_list()
@@ -221,8 +225,15 @@ def handle_player_move(data):
         emit('room_not_found', {'error': 'Room not found'})
         return
 
-    x = data.get('x')
-    y = data.get('y')
+    delta_x = data.get('x')
+    delta_y = data.get('y')
+    x = room['state'].players[request.sid]['x'] + delta_x
+    y = room['state'].players[request.sid]['y'] + delta_y
+    timestamp = data.get('timestamp', time.time())
+    last_update = room['state'].players[request.sid]['last_update']
+    print(last_update, timestamp, last_update < timestamp)
+    if timestamp < last_update:
+        return
     # print(x, y)
     # Handle ball collision
     ball = room['state'].ball
@@ -231,7 +242,8 @@ def handle_player_move(data):
         dy = y - ball['y']
         ball['vx'] -= dx * BALL_KICK_FORCE
         ball['vy'] -= dy * BALL_KICK_FORCE
-    game_rooms[room_id]['state'].update_player(request.sid, x, y)
+    room['state'].update_player(request.sid, x, y)
+    room['state'].players[request.sid]['last_update'] = timestamp
     # send_game_state(room_id)
 
 def game_loop(room_id):

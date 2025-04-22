@@ -6,10 +6,11 @@ const Status = {
   GAME_ENDED: 'game_ended',
 }
 const GAME_WIDTH = 300;
-const GAME_HEIGHT = 600;
+const GAME_HEIGHT = 450;
 const PLAYER_RADIUS = 15;
 const BALL_RADIUS = 10;
 const PLAYER_SPEED = 2;
+const UPDATE_RATE = 50; // 30 updates/sec (ms)
 // Colors
 const BALL_COLOR = 'white';
 const LOCAL_PLAYER_COLOR = 'blue';
@@ -22,7 +23,7 @@ let playerId = null;
 let currentRoom = null;
 let position = null;
 let keysPressed = {};
-// let players = [];
+let lastUpdateTime = 0; // For throttling player_move
 
 window.onload = () => {
   DOM.lobby = document.getElementById('lobby');
@@ -191,7 +192,6 @@ socket.on('game_state', (state) => {
 
 function renderGame(state) {
   const ctx = DOM.ctx;
-  console.log(ctx);
   // Clear the canvas
   ctx.fillStyle = BACKGROUND_COLOR;
   ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
@@ -244,10 +244,17 @@ function gameLoop() {
     // position.y = Math.max(PLAYER_RADIUS, Math.min(GAME_HEIGHT - PLAYER_RADIUS, position.y));
 
     // Send update if changed
-    if (position.x !== prevPosition.x || position.y !== prevPosition.y) {
+    const now = Date.now();
+    // console.log(now, lastUpdateTime, now - lastUpdateTime);
+    if (now - lastUpdateTime >= UPDATE_RATE && (position.x !== prevPosition.x || position.y !== prevPosition.y)) {
       // console.log(position);
       // Unsafe - better to send position delta
-      socket.emit('player_move', position);
+      socket.emit('player_move', {
+        x: position.x - prevPosition.x,
+        y: position.y - prevPosition.y,
+        timestamp: now,
+      });
+      lastUpdateTime = now;
     }
   }
 
