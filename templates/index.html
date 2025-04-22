@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real-time Football Game</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Socket.IO CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+  <!-- External JavaScript -->
+  <script src="../static/script.js" defer></script>
+  <style>
+    button#leave-game-btn {
+      display: none;
+    }
+    button#start-game-btn {
+      display: none;
+    }
+  </style>
+</head>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen">
+  <div class="bg-gray-800 p-8 rounded-lg shadow-lg text-center text-white w-full max-w-md">
+    <h1 class="text-3xl font-bold mb-6">Multiplayer Football Game</h1>
+    <div class="space-y-4">
+      <!-- Create Room Button -->
+      <button
+          id="create-game-btn"
+          class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
+      >
+        Create New Game
+      </button>
+      <!-- Join Room Input and Button -->
+      <div class="flex space-x-2">
+        <input
+            id="room-id-input"
+            type="text"
+            placeholder="Enter Room ID"
+            class="flex-1 bg-gray-700 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+        <button
+            id="join-game-btn"
+            class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
+        >
+          Join Game
+        </button>
+        <button
+            id="start-game-btn"
+            class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
+        >
+          Start Game
+        </button>
+        <button
+            id="leave-game-btn"
+            class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
+        >
+          Leave Game
+        </button>
+      </div>
+      <div id="player-id-label" class="text-sm font-medium text-gray-400"></div>
+      <!-- Status Messages -->
+      <p id="status" class="mt-4 text-gray-400"></p>
+      <!-- Players List -->
+      <p class="text-lg font-semibold mt-6">List of Rooms</p>
+      <div id="room-list" class="text-gray-300"></div>
+    </div>
+  </div>
+</body>
+</html>
