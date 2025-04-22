@@ -1,3 +1,6 @@
+import copy
+import threading
+import time
 from random import randint
 
 import eventlet
@@ -6,6 +9,12 @@ eventlet.monkey_patch()  # Required for WebSocket support
 
 from flask import Flask, request, render_template
 from flask_socketio import SocketIO, join_room, leave_room, emit
+
+
+COLLISION_DISTANCE = 25
+BALL_KICK_FORCE = 0.1
+UPDATE_INTERVAL = 1 / 60
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'
@@ -21,6 +30,40 @@ class GameStatus:
     WAITING = 'waiting'
     PLAYING = 'playing'
     ENDED = 'ended'
+
+
+class GameState:
+    def __init__(self):
+        self.players = {}
+        self.ball = {'x': 300, 'y': 200, 'vx': 0, 'vy': 0}
+
+    def reset_ball(self):
+        self.ball['x'] = 300
+        self.ball['y'] = 200
+        self.ball['vx'] = 0
+        self.ball['vy'] = 0
+
+    def init_players(self, player_ids):
+        for player_id in player_ids:
+            self.init_player(player_id)
+
+    def init_player(self, player_id):
+        self.players[player_id] = {
+            'x': 100,
+            'y': 100,
+        }
+
+    def update_player(self, player_id, x, y):
+        if player_id not in self.players:
+            raise ValueError(f"Player {player_id} not found in game state.")
+        self.players[player_id]['x'] = x
+        self.players[player_id]['y'] = y
+
+    def to_json(self):
+        return {
+            'players': self.players,
+            'ball': self.ball,
+        }
 
 
 # MAIN_ROOM = 'main_room'  # Default room for all players
@@ -71,6 +114,8 @@ def handle_create_game():
     game_rooms[room_id] = {
         'players': [request.sid],
         'status': GameStatus.WAITING,
+        'state': GameState(),
+        'thread': None,
     }
     players_rooms[request.sid] = room_id
     send_room_list()
@@ -132,17 +177,93 @@ def send_room_list():
     ]
     socketio.emit('room_list', {'rooms': room_list})
 
+
 @socketio.on('start_game')
 def handle_start_game():
     print('Handle start game by client:', request.sid)
     room_id = players_rooms.get(request.sid)
     if room_id is None:
         emit('not_in_room', {'error': 'You are not in any room'})
+        return
+    room = game_rooms.get(room_id)
+    if room is None:
+        emit('room_not_found', {'error': 'Room not found'})
+        return
     # Start the game logic here
     emit('game_started', {'room_id': room_id}, to=room_id)
-    game_rooms[room_id]['status'] = GameStatus.PLAYING
+    room['status'] = GameStatus.PLAYING
     send_room_list()
+    room['state'].init_players(game_rooms[room_id]['players'])
+    send_game_state(room_id)
+    room['thread'] = threading.Thread(
+        target=game_loop,
+        args=(room_id,),
+        daemon=True
+    )
+    room['thread'].start()
 
+
+def send_game_state(room_id):
+    game_state = game_rooms[room_id]['state'].to_json()
+    socketio.emit('game_state', game_state, to=room_id)
+
+
+@socketio.on('player_move')
+def handle_player_move(data):
+    # print('Handle player move by client:', request.sid)
+    # print('Player move data:', data)
+    room_id = players_rooms.get(request.sid)
+    if room_id is None:
+        emit('not_in_room', {'error': 'You are not in any room'})
+        return
+    room = game_rooms.get(room_id)
+    if room is None:
+        emit('room_not_found', {'error': 'Room not found'})
+        return
+
+    x = data.get('x')
+    y = data.get('y')
+    # print(x, y)
+    # Handle ball collision
+    ball = room['state'].ball
+    if (x - ball['x']) ** 2 + (y - ball['y']) ** 2 < COLLISION_DISTANCE ** 2:
+        dx = x - ball['x']
+        dy = y - ball['y']
+        ball['vx'] -= dx * BALL_KICK_FORCE
+        ball['vy'] -= dy * BALL_KICK_FORCE
+    game_rooms[room_id]['state'].update_player(request.sid, x, y)
+    # send_game_state(room_id)
+
+def game_loop(room_id):
+    print("Game loop started for room:", room_id)
+    while True:
+        # print('Game loop iteration for room:', room_id)
+        eventlet.sleep(UPDATE_INTERVAL)  # Simulate game loop delay
+        room = game_rooms.get(room_id)
+        if room is None:
+            break  # Exit if the room is deleted
+
+        # prev_state = copy.deepcopy(room['state'])
+        ball = room['state'].ball
+
+        # Update ball physics
+        ball['x'] += ball['vx']
+        ball['y'] += ball['vy']
+        ball['vx'] *= 0.98  # friction
+        ball['vy'] *= 0.98
+
+        # Boundary checks
+        if ball['x'] < 10 or ball['x'] > 590:
+            ball['vx'] *= -1
+        if ball['y'] < 10 or ball['y'] > 390:
+            ball['vy'] *= -1
+
+        # Broadcast state if smth changed
+        # if room['state'] != prev_state:
+        # print(room['state'])
+        send_game_state(room_id)
+        # time.sleep(UPDATE_INTERVAL)
+        # print("Game state sent to room:", room_id)
 
 @app.route('/')
 def index():

@@ -17,10 +17,13 @@
     button#start-game-btn {
       display: none;
     }
+    #game-canvas {
+      display: none;
+    }
   </style>
 </head>
 <body class="bg-gray-900 flex items-center justify-center min-h-screen">
-  <div class="bg-gray-800 p-8 rounded-lg shadow-lg text-center text-white w-full max-w-md">
+  <div id="lobby" class="bg-gray-800 p-8 rounded-lg shadow-lg text-center text-white w-full max-w-md">
     <h1 class="text-3xl font-bold mb-6">Multiplayer Football Game</h1>
     <div class="space-y-4">
       <!-- Create Room Button -->
@@ -65,5 +68,6 @@
       <div id="room-list" class="text-gray-300"></div>
     </div>
   </div>
+  <canvas id="game-canvas" width="600" height="400"></canvas>
 </body>
 </html>
