@@ -67,6 +67,12 @@ class GameState:
             raise ValueError(f"Player {player_id} not found in game state.")
         self.players[player_id]['x'] = x
         self.players[player_id]['y'] = y
+        self.players[player_id]['last_update'] = time.time()
+
+    def remove_player(self, player_id):
+        if player_id not in self.players:
+            print(f"On try to remove: Player {player_id} not found in game state.")
+        del self.players[player_id]
 
     def to_json(self):
         return {
@@ -78,7 +84,7 @@ class GameState:
 # MAIN_ROOM = 'main_room'  # Default room for all players
 
 @socketio.on('connect')
-def handle_connect():
+def handle_connect(*args, **kwargs):
     print(f'Client {request.sid} connected')
     players.append(request.sid)
     # join_room(MAIN_ROOM)
@@ -88,7 +94,7 @@ def handle_connect():
 
 
 @socketio.on('disconnect')
-def handle_disconnect():
+def handle_disconnect(*args, **kwargs):
     print(f'Client {request.sid} disconnected')
     del players[players.index(request.sid)]
     # leave_room(MAIN_ROOM)
@@ -99,6 +105,7 @@ def handle_disconnect():
             # Remove player from the room['players'] list
             room['players'].remove(request.sid)
             players_rooms.pop(request.sid, None)
+            room['state'].remove_player(request.sid)
             if len(room['players']) == 0:
                 del game_rooms[room_id]
             else:
@@ -249,7 +256,6 @@ def handle_player_move(data):
         ball['vx'] -= dx * BALL_KICK_FORCE
         ball['vy'] -= dy * BALL_KICK_FORCE
     room['state'].update_player(request.sid, x, y)
-    room['state'].players[request.sid]['last_update'] = timestamp
     # send_game_state(room_id)
 
 def game_loop(room_id):
@@ -291,7 +297,6 @@ def game_loop(room_id):
         # if room['state'] != prev_state:
         # print(room['state'])
         send_game_state(room_id)
-        # time.sleep(UPDATE_INTERVAL)
         # print("Game state sent to room:", room_id)
 
 @app.route('/')
