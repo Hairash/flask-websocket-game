@@ -38,6 +38,7 @@ class GameState:
     def __init__(self):
         self.players = {}
         self.ball = {'x': WIDTH / 2, 'y': HEIGHT / 2, 'vx': 0, 'vy': 0}
+        self._team_ctr = 0
 
     def reset_ball(self):
         self.ball['x'] = WIDTH / 2
@@ -51,10 +52,13 @@ class GameState:
 
     def init_player(self, player_id):
         self.players[player_id] = {
-            'x': 100,
-            'y': 100,
+            'x': WIDTH / 2,
+            'y': HEIGHT / 4 + self._team_ctr * HEIGHT / 2,
             'last_update': time.time(),
+            'team': self._team_ctr,
         }
+        self._team_ctr += 1
+        self._team_ctr %= 2
 
     def update_player(self, player_id, x, y):
         if player_id not in self.players:

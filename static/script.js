@@ -13,8 +13,8 @@ const PLAYER_SPEED = 2;
 const UPDATE_RATE = 50; // 30 updates/sec (ms)
 // Colors
 const BALL_COLOR = 'white';
-const LOCAL_PLAYER_COLOR = 'blue';
-const REMOTE_PLAYER_COLOR = 'red';
+const PLAYER_TEAM0_COLOR = 'blue';
+const PLAYER_TEAM1_COLOR = 'red';
 const BACKGROUND_COLOR = '#4CAF50';
 
 let status = Status.DISCONNECTED;
@@ -206,8 +206,14 @@ function renderGame(state) {
   Object.entries(state.players).forEach(([id, player]) => {
     ctx.beginPath();
     ctx.arc(player.x, player.y, PLAYER_RADIUS, 0, Math.PI * 2);
-    ctx.fillStyle = id === playerId ? LOCAL_PLAYER_COLOR : REMOTE_PLAYER_COLOR;
+    ctx.fillStyle = player.team === 0 ? PLAYER_TEAM0_COLOR : PLAYER_TEAM1_COLOR;
     ctx.fill();
+    // TODO: Stroke current player only after others
+    if (id === playerId) {
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'black';
+      ctx.stroke();
+    }
   });
 }
 
