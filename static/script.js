@@ -28,7 +28,7 @@ let lastUpdateTime = 0; // For throttling player_move
 window.onload = () => {
   DOM.lobby = document.getElementById('lobby');
   DOM.playerIdLabel = document.getElementById('player-id-label');
-  DOM.playersList = document.getElementById('players-list');
+  // DOM.playersList = document.getElementById('players-list');
   DOM.roomList = document.getElementById('room-list');
   DOM.createGameBtn = document.getElementById('create-game-btn');
   DOM.roomIdInput = document.getElementById('room-id-input');
@@ -110,6 +110,9 @@ socket.on('room_list', (data) => {
   DOM.roomList.innerHTML = ''; // Clear existing rooms
 
   data.rooms.forEach(room => {
+    if (!room.players.includes(playerId)) {
+      return;
+    }
     const roomDiv = document.createElement('div');
     roomDiv.id = `room-${room.room_id}`;
     roomDiv.classList.add('room', 'p-4', 'rounded-lg', 'shadow-md', 'mb-4');
@@ -122,7 +125,7 @@ socket.on('room_list', (data) => {
 
     const roomIdLabel = document.createElement('p');
     roomIdLabel.classList.add('room-id-label', 'text-lg', 'font-semibold', 'text-blue-400', 'mb-2');
-    roomIdLabel.textContent = room.room_id;
+    roomIdLabel.textContent = `Game ID: ${room.room_id}`;
     roomDiv.appendChild(roomIdLabel);
 
     const playerListDiv = document.createElement('div');
@@ -134,8 +137,8 @@ socket.on('room_list', (data) => {
       playerLi.classList.add('player', 'text-gray-300', 'py-1', 'pl-2');
       playerLi.textContent = playerId;
       playerListDiv.appendChild(playerLi);
-    })
-  })
+    });
+  });
 });
 
 function handleLeaveGame() {
