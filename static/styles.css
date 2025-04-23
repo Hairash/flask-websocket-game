@@ -1,0 +1,112 @@
+button#leave-game-btn {
+    display: none;
+}
+
+button#start-game-btn {
+    display: none;
+}
+
+div#game-container {
+    display: none;
+    position: relative;
+}
+
+div.score {
+    position: absolute;
+    font-size: 48px;
+
+    /* Disable selection and focus */
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE/Edge */
+    user-select: none; /* Standard */
+    touch-action: manipulation; /* Prevent double-tap zoom */
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight */
+}
+
+div#score0 {
+    left: calc(50% - 100px);
+    transform: translateX(-50%);
+    color: blue;
+}
+
+div#score1 {
+    left: calc(50% + 100px);
+    transform: translateX(-50%);
+    color: red;
+}
+
+/* Touch controls container */
+#touch-controls {
+    display: none;
+    grid-template-columns: repeat(3, var(--button-size));
+    grid-template-rows: repeat(3, var(--button-size));
+    gap: var(--button-gap);
+    justify-content: center;
+    padding: 10px;
+    background-color: rgb(17, 24, 39);
+    border-radius: 8px;
+
+    /* Disable selection and focus */
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE/Edge */
+    user-select: none; /* Standard */
+    touch-action: manipulation; /* Prevent double-tap zoom */
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight */
+}
+
+/* Define grid areas for buttons (cross pattern) */
+#touch-up {
+    grid-area: 1 / 2;
+}
+#touch-left {
+    grid-area: 2 / 1;
+}
+#touch-right {
+    grid-area: 2 / 3;
+}
+#touch-down {
+    grid-area: 3 / 2;
+}
+
+/* Button styles */
+.touch-button {
+    width: var(--button-size);
+    height: var(--button-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #444;
+    color: white;
+    font-size: calc(var(--button-size) * 0.5);
+    border: 2px solid #fff;
+    border-radius: 5px;
+    cursor: pointer;
+
+    /* Disable selection and focus */
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE/Edge */
+    user-select: none; /* Standard */
+    touch-action: manipulation; /* Prevent double-tap zoom */
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight */
+}
+
+.touch-button:focus {
+    outline: none;
+}
+
+/* Custom properties for dynamic layout */
+:root {
+    --button-size: 60px; /* Bigger buttons */
+    --button-gap: 0px; /* Closer together */
+}
+
+/* Optional: Responsive adjustments */
+/*@media (max-width: 400px) {*/
+/*    :root {*/
+/*        --button-size: 50px;*/
+/*        --button-gap: 4px;*/
+/*    }*/
+/*}*/

@@ -1,3 +1,4 @@
+import copy
 import os
 import threading
 import time
@@ -13,6 +14,7 @@ from flask_socketio import SocketIO, join_room, leave_room, emit
 
 COLLISION_DISTANCE = 25
 BALL_KICK_FORCE = 0.1
+BALL_FRICTION = 0.99
 UPDATE_INTERVAL = float(os.getenv('UPDATE_INTERVAL', 1 / 60))  # seconds
 WIDTH = 300
 HEIGHT = 450
@@ -235,7 +237,7 @@ def handle_player_move(data):
     y = room['state'].players[request.sid]['y'] + delta_y
     timestamp = data.get('timestamp', time.time())
     last_update = room['state'].players[request.sid]['last_update']
-    print(last_update, timestamp, last_update < timestamp)
+    # print(last_update, timestamp, last_update < timestamp)
     if timestamp < last_update:
         return
     # print(x, y)
@@ -261,17 +263,28 @@ def game_loop(room_id):
 
         # prev_state = copy.deepcopy(room['state'])
         ball = room['state'].ball
+        prev_ball = copy.deepcopy(ball)
 
         # Update ball physics
         ball['x'] += ball['vx']
         ball['y'] += ball['vy']
-        ball['vx'] *= 0.98  # friction
-        ball['vy'] *= 0.98
+        ball['vx'] *= BALL_FRICTION
+        ball['vy'] *= BALL_FRICTION
+
+        # Check goal
+        if ball['y'] < 10 and WIDTH / 4 < ball['x'] < WIDTH * 3 / 4:
+            print("Goal to team 0")
+            socketio.emit('goal_scored', {'team': 1}, to=room_id)
+            room['state'].reset_ball()
+        elif ball['y'] > HEIGHT - 10 and WIDTH / 4 < ball['x'] < WIDTH * 3 / 4:
+            print("Goal to team 1")
+            socketio.emit('goal_scored', {'team': 0}, to=room_id)
+            room['state'].reset_ball()
 
         # Boundary checks
-        if ball['x'] < 10 or ball['x'] > WIDTH - 10:
+        if (ball['x'] < min(10, prev_ball['x'])) or (ball['x'] > max(WIDTH - 10, prev_ball['x'])):
             ball['vx'] *= -1
-        if ball['y'] < 10 or ball['y'] > HEIGHT - 10:
+        if (ball['y'] < min(10, prev_ball['y'])) or (ball['y'] > max(HEIGHT - 10, prev_ball['y'])):
             ball['vy'] *= -1
 
         # TODO: Broadcast state only if smth changed

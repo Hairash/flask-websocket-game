@@ -4,34 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Real-time Football Game</title>
+  <link rel="stylesheet" href="/static/styles.css">
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Socket.IO CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
   <!-- External JavaScript -->
-  <script src="../static/script.js" defer></script>
-  <style>
-    button#leave-game-btn {
-      display: none;
-    }
-
-    button#start-game-btn {
-      display: none;
-    }
-
-    div#game-container {
-      display: none;
-    }
-
-    .touch-button {
-      -webkit-user-select: none; /* Safari */
-      -moz-user-select: none; /* Firefox */
-      -ms-user-select: none; /* IE/Edge */
-      user-select: none; /* Standard */
-      touch-action: manipulation; /* Prevent double-tap zoom */
-      -webkit-tap-highlight-color: transparent; /* Remove tap highlight */
-    }
-  </style>
+  <script src="/static/script.js" defer></script>
 </head>
 <body class="bg-gray-900 flex items-center justify-center min-h-screen">
   <!-- Lobby Container -->
@@ -86,7 +65,7 @@
   <!-- Game Container -->
   <div
       id="game-container"
-      class="bg-gray-800 p-4 sm:p-8 rounded-lg shadow-lg text-center text-white w-full max-w-md flex flex-col items-center"
+      class="bg-gray-900 p-4 sm:p-8 rounded-lg shadow-lg text-center text-white w-full max-w-md flex flex-col items-center"
   >
     <!-- Game Canvas -->
     <canvas
@@ -95,38 +74,34 @@
         height="450"
         class="bg-gray-700 border-2 border-blue-500 rounded-lg w-full max-w-[300px] mx-auto"
     ></canvas>
+    <div id="score0" class="score">0</div>
+    <div id="score1" class="score">0</div>
     <!-- Touch Controls (Mobile Only) -->
-    <!-- Make unselectable -->
-    <div class="block md:hidden mt-4 grid grid-cols-3 gap-2 w-48 mx-auto">
-      <div></div>
+    <div id="touch-controls">
       <button
           id="touch-up"
-          class="touch-button bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-full w-12 h-12 flex items-center justify-center"
+          class="touch-button"
           data-key="ArrowUp"
       >↑
       </button>
-      <div></div>
       <button
           id="touch-left"
-          class="touch-button bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-full w-12 h-12 flex items-center justify-center"
+          class="touch-button"
           data-key="ArrowLeft"
       >←
       </button>
-      <div></div>
       <button
           id="touch-right"
-          class="touch-button bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-full w-12 h-12 flex items-center justify-center"
+          class="touch-button"
           data-key="ArrowRight"
       >→
       </button>
-      <div></div>
       <button
           id="touch-down"
-          class="touch-button bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-full w-12 h-12 flex items-center justify-center"
+          class="touch-button"
           data-key="ArrowDown"
       >↓
       </button>
-      <div></div>
     </div>
   </div>
 </body>

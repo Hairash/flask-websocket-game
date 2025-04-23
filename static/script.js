@@ -38,6 +38,13 @@ window.onload = () => {
   DOM.gameCanvas = document.getElementById('game-canvas');
   DOM.gameContainer = document.getElementById('game-container');
   DOM.ctx = DOM.gameCanvas.getContext('2d');
+  DOM.scores = [
+    document.getElementById('score0'),
+    document.getElementById('score1'),
+  ];
+
+  const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
+  DOM.gameContainer.querySelector('#touch-controls').style.display = isTouchDevice ? 'grid' : 'none';
 
   // Set up event listeners
   DOM.createGameBtn.addEventListener('click', handleCreateGame);
@@ -189,12 +196,26 @@ socket.on('game_state', (state) => {
   renderGame(state);
 });
 
+socket.on('goal_scored', (data) => {
+  console.log('Goal scored:', data);
+  const teamIndex = data.team;
+  const scoreElement = DOM.scores[teamIndex];
+  let score = parseInt(scoreElement.textContent) || 0;
+  score += 1;
+  scoreElement.textContent = score;
+});
+
 
 function renderGame(state) {
   const ctx = DOM.ctx;
   // Clear the canvas
   ctx.fillStyle = BACKGROUND_COLOR;
   ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+  // Draw goals
+  ctx.fillStyle = 'white';
+  ctx.fillRect(GAME_WIDTH / 4, 0, GAME_WIDTH / 2, 5); // Top goal
+  ctx.fillRect(GAME_WIDTH / 4, GAME_HEIGHT, GAME_WIDTH / 2, -5); // Bottom goal
 
   // Draw ball
   ctx.beginPath();
